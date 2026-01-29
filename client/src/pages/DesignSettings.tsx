@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -35,11 +35,11 @@ export default function DesignSettingsPage() {
   const [formData, setFormData] = useState<Partial<DesignSettings>>({});
 
   // Update formData when settings load
-  useState(() => {
+  useEffect(() => {
     if (settings) {
       setFormData(settings);
     }
-  });
+  }, [settings]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<DesignSettings>) => {

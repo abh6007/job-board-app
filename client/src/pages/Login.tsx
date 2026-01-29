@@ -95,6 +95,18 @@ export default function Login() {
             >
               {isLoading ? "Logging in..." : "Login"}
             </Button>
+
+            <div className="text-center mt-4">
+              <Button
+                type="button"
+                variant="link"
+                className="text-sm text-blue-600 hover:text-blue-800"
+                onClick={() => setLocation("/reset-password")}
+              >
+                Locked out? Use Recovery Code
+              </Button>
+            </div>
+
             <div className="text-sm text-center text-muted-foreground mt-4">
               <p>Default credentials:</p>
               <p className="font-mono text-xs mt-1">
