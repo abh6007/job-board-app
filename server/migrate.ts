@@ -16,13 +16,35 @@ async function runMigrations() {
   console.log('Creating database tables...');
 
   try {
+    // Drop existing tables to recreate with correct schema
+    await db.execute(sql`DROP TABLE IF EXISTS users CASCADE;`);
+    await db.execute(sql`DROP TABLE IF EXISTS sessions CASCADE;`);
+    console.log('✓ Dropped old tables');
+
+    // Create sessions table
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS sessions (
+        sid VARCHAR PRIMARY KEY,
+        sess JSONB NOT NULL,
+        expire TIMESTAMP NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS IDX_session_expire ON sessions(expire);
+    `);
+    console.log('✓ Sessions table created');
+
     // Create users table
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username TEXT NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        username VARCHAR NOT NULL UNIQUE,
+        password VARCHAR NOT NULL,
+        email VARCHAR UNIQUE,
+        first_name VARCHAR,
+        last_name VARCHAR,
+        profile_image_url VARCHAR,
+        is_admin BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
     console.log('✓ Users table created');
