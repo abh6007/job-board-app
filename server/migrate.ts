@@ -97,6 +97,30 @@ async function runMigrations() {
     `);
     console.log('✓ About me table created');
 
+    // Create design_settings table
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS design_settings (
+        id SERIAL PRIMARY KEY,
+        primary_color TEXT DEFAULT '#3b82f6',
+        secondary_color TEXT DEFAULT '#8b5cf6',
+        background_color TEXT DEFAULT '#ffffff',
+        text_color TEXT DEFAULT '#1f2937',
+        button_color TEXT DEFAULT '#3b82f6',
+        button_text_color TEXT DEFAULT '#ffffff',
+        font_family TEXT DEFAULT 'Inter',
+        heading_font TEXT DEFAULT 'Inter',
+        font_size TEXT DEFAULT 'medium',
+        layout_style TEXT DEFAULT 'modern',
+        border_radius TEXT DEFAULT 'medium',
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      
+      INSERT INTO design_settings (id) 
+      VALUES (1) 
+      ON CONFLICT (id) DO NOTHING;
+    `);
+    console.log('✓ Design settings table created');
+
     console.log('✅ All tables created successfully!');
   } catch (error) {
     console.error('Error creating tables:', error);

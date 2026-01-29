@@ -115,6 +115,24 @@ export async function registerRoutes(
     res.json(about);
   });
 
+  // Design Settings
+  app.get("/api/design-settings", async (req, res) => {
+    const settings = await storage.getDesignSettings();
+    res.json(settings || null);
+  });
+
+  app.put("/api/design-settings", requireAdmin, async (req, res) => {
+    try {
+      const settings = await storage.updateDesignSettings(req.body);
+      res.json(settings);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      throw err;
+    }
+  });
+
   // Seed Data
   await seedDatabase();
 

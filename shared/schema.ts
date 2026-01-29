@@ -55,6 +55,34 @@ export const aboutMe = pgTable("about_me", {
 
 export const insertAboutMeSchema = createInsertSchema(aboutMe).omit({ id: true });
 
+// Design Settings - For customizing website appearance
+export const designSettings = pgTable("design_settings", {
+  id: serial("id").primaryKey(),
+  // Colors
+  primaryColor: text("primary_color").default("#3b82f6"), // Blue
+  secondaryColor: text("secondary_color").default("#8b5cf6"), // Purple
+  backgroundColor: text("background_color").default("#ffffff"), // White
+  textColor: text("text_color").default("#1f2937"), // Dark gray
+  buttonColor: text("button_color").default("#3b82f6"), // Blue
+  buttonTextColor: text("button_text_color").default("#ffffff"), // White
+  
+  // Typography
+  fontFamily: text("font_family").default("Inter"), // Default font
+  headingFont: text("heading_font").default("Inter"),
+  fontSize: text("font_size").default("medium"), // small, medium, large
+  
+  // Layout
+  layoutStyle: text("layout_style").default("modern"), // modern, classic, minimal
+  borderRadius: text("border_radius").default("medium"), // none, small, medium, large
+  
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDesignSettingsSchema = createInsertSchema(designSettings).omit({ 
+  id: true, 
+  updatedAt: true 
+});
+
 // Types
 export type Job = typeof jobs.$inferSelect;
 export type InsertJob = z.infer<typeof insertJobSchema>;
@@ -67,3 +95,6 @@ export type InsertAutomationLink = z.infer<typeof insertAutomationLinkSchema>;
 
 export type AboutMe = typeof aboutMe.$inferSelect;
 export type InsertAboutMe = z.infer<typeof insertAboutMeSchema>;
+
+export type DesignSettings = typeof designSettings.$inferSelect;
+export type InsertDesignSettings = z.infer<typeof insertDesignSettingsSchema>;

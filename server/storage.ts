@@ -1,9 +1,10 @@
 import { 
-  jobs, socialLinks, automationLinks, aboutMe,
+  jobs, socialLinks, automationLinks, aboutMe, designSettings,
   type Job, type InsertJob, 
   type SocialLink, type InsertSocialLink,
   type AutomationLink, type InsertAutomationLink,
-  type AboutMe, type InsertAboutMe 
+  type AboutMe, type InsertAboutMe,
+  type DesignSettings, type InsertDesignSettings
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, count } from "drizzle-orm";
@@ -38,6 +39,10 @@ export interface IStorage {
   // About Me
   getAboutMe(): Promise<AboutMe | undefined>;
   updateAboutMe(content: InsertAboutMe): Promise<AboutMe>;
+
+  // Design Settings
+  getDesignSettings(): Promise<DesignSettings | undefined>;
+  updateDesignSettings(settings: Partial<InsertDesignSettings>): Promise<DesignSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -136,6 +141,26 @@ export class DatabaseStorage implements IStorage {
       return updated;
     } else {
       const [created] = await db.insert(aboutMe).values(content).returning();
+      return created;
+    }
+  }
+
+  async getDesignSettings(): Promise<DesignSettings | undefined> {
+    const [data] = await db.select().from(designSettings).limit(1);
+    return data;
+  }
+
+  async updateDesignSettings(settings: Partial<InsertDesignSettings>): Promise<DesignSettings> {
+    const existing = await this.getDesignSettings();
+    if (existing) {
+      const [updated] = await db
+        .update(designSettings)
+        .set({ ...settings, updatedAt: new Date() })
+        .where(eq(designSettings.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(designSettings).values(settings).returning();
       return created;
     }
   }
