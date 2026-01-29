@@ -83,6 +83,18 @@ export const insertDesignSettingsSchema = createInsertSchema(designSettings).omi
   updatedAt: true 
 });
 
+// Recovery Codes - For password reset
+export const recoveryCodes = pgTable("recovery_codes", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertRecoveryCodeSchema = createInsertSchema(recoveryCodes).omit({ 
+  id: true, 
+  createdAt: true 
+});
+
 // Types
 export type Job = typeof jobs.$inferSelect;
 export type InsertJob = z.infer<typeof insertJobSchema>;
@@ -98,3 +110,6 @@ export type InsertAboutMe = z.infer<typeof insertAboutMeSchema>;
 
 export type DesignSettings = typeof designSettings.$inferSelect;
 export type InsertDesignSettings = z.infer<typeof insertDesignSettingsSchema>;
+
+export type RecoveryCode = typeof recoveryCodes.$inferSelect;
+export type InsertRecoveryCode = z.infer<typeof insertRecoveryCodeSchema>;

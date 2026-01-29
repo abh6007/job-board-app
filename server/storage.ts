@@ -1,11 +1,14 @@
 import { 
-  jobs, socialLinks, automationLinks, aboutMe, designSettings,
+  jobs, socialLinks, automationLinks, aboutMe, designSettings, recoveryCodes,
   type Job, type InsertJob, 
   type SocialLink, type InsertSocialLink,
   type AutomationLink, type InsertAutomationLink,
   type AboutMe, type InsertAboutMe,
-  type DesignSettings, type InsertDesignSettings
+  type DesignSettings, type InsertDesignSettings,
+  type RecoveryCode, type InsertRecoveryCode
 } from "@shared/schema";
+import { users } from "@shared/models/auth";
+import { hashPassword, verifyPassword, generateRecoveryCode } from "./auth";
 import { db } from "./db";
 import { eq, desc, sql, count } from "drizzle-orm";
 
@@ -43,6 +46,11 @@ export interface IStorage {
   // Design Settings
   getDesignSettings(): Promise<DesignSettings | undefined>;
   updateDesignSettings(settings: Partial<InsertDesignSettings>): Promise<DesignSettings>;
+
+  // Password Management
+  changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean>;
+  getRecoveryCode(): Promise<string>;
+  resetPasswordWithRecoveryCode(username: string, recoveryCode: string, newPassword: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -162,6 +170,81 @@ export class DatabaseStorage implements IStorage {
     } else {
       const [created] = await db.insert(designSettings).values(settings).returning();
       return created;
+    }
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
+    try {
+      // Get user
+      const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      if (!user) return false;
+
+      // Verify current password
+      if (!verifyPassword(currentPassword, user.password)) {
+        return false;
+      }
+
+      // Update password
+      await db
+        .update(users)
+        .set({ password: hashPassword(newPassword), updatedAt: new Date() })
+        .where(eq(users.id, userId));
+
+      return true;
+    } catch (error) {
+      console.error('Error changing password:', error);
+      return false;
+    }
+  }
+
+  async getRecoveryCode(): Promise<string> {
+    // Check if recovery code exists
+    const [existing] = await db.select().from(recoveryCodes).limit(1);
+    
+    if (existing) {
+      return existing.code;
+    }
+
+    // Generate new recovery code
+    const code = generateRecoveryCode();
+    await db.insert(recoveryCodes).values({ code });
+    return code;
+  }
+
+  async resetPasswordWithRecoveryCode(username: string, recoveryCode: string, newPassword: string): Promise<boolean> {
+    try {
+      // Verify recovery code
+      const [codeRecord] = await db
+        .select()
+        .from(recoveryCodes)
+        .where(eq(recoveryCodes.code, recoveryCode))
+        .limit(1);
+
+      if (!codeRecord) {
+        return false;
+      }
+
+      // Get user by username
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.username, username))
+        .limit(1);
+
+      if (!user) {
+        return false;
+      }
+
+      // Update password
+      await db
+        .update(users)
+        .set({ password: hashPassword(newPassword), updatedAt: new Date() })
+        .where(eq(users.id, user.id));
+
+      return true;
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      return false;
     }
   }
 }

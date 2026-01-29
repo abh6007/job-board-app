@@ -121,6 +121,16 @@ async function runMigrations() {
     `);
     console.log('✓ Design settings table created');
 
+    // Create recovery_codes table
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS recovery_codes (
+        id SERIAL PRIMARY KEY,
+        code TEXT NOT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('✓ Recovery codes table created');
+
     console.log('✅ All tables created successfully!');
   } catch (error) {
     console.error('Error creating tables:', error);

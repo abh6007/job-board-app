@@ -54,14 +54,24 @@ export default function Admin() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold font-display">Admin Dashboard</h1>
-          <Button 
-            onClick={() => setLocation("/admin/design")}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Settings className="w-4 h-4" />
-            Design Settings
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setLocation("/admin/password")}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Lock className="w-4 h-4" />
+              Password
+            </Button>
+            <Button 
+              onClick={() => setLocation("/admin/design")}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              Design
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="stats" className="space-y-8">

@@ -17,6 +17,14 @@ function verifyPassword(password: string, hash: string): boolean {
   return hashPassword(password) === hash;
 }
 
+// Generate recovery code (unique per installation)
+function generateRecoveryCode(): string {
+  return crypto.randomBytes(16).toString('hex');
+}
+
+// Export these for use in routes
+export { hashPassword, verifyPassword, generateRecoveryCode };
+
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);

@@ -133,6 +133,75 @@ export async function registerRoutes(
     }
   });
 
+  // Password Management
+  app.post("/api/change-password", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current and new password required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    try {
+      const user = req.user as any;
+      const result = await storage.changePassword(user.id, currentPassword, newPassword);
+      
+      if (!result) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      res.json({ message: "Password changed successfully" });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  // Recovery Code - Get (admin only)
+  app.get("/api/recovery-code", requireAdmin, async (req, res) => {
+    try {
+      const code = await storage.getRecoveryCode();
+      res.json({ code });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to get recovery code" });
+    }
+  });
+
+  // Recovery Code - Reset Password (no auth required)
+  app.post("/api/reset-password", async (req, res) => {
+    const { recoveryCode, newPassword, username } = req.body;
+
+    if (!recoveryCode || !newPassword || !username) {
+      return res.status(400).json({ message: "Recovery code, username, and new password required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    try {
+      const result = await storage.resetPasswordWithRecoveryCode(
+        username,
+        recoveryCode,
+        newPassword
+      );
+
+      if (!result) {
+        return res.status(400).json({ message: "Invalid recovery code or username" });
+      }
+
+      res.json({ message: "Password reset successfully" });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
   // Seed Data
   await seedDatabase();
 

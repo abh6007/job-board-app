@@ -10,6 +10,8 @@ import Contact from "@/pages/Contact";
 import Admin from "@/pages/Admin";
 import Login from "@/pages/Login";
 import DesignSettings from "@/pages/DesignSettings";
+import ChangePassword from "@/pages/ChangePassword";
+import ResetPassword from "@/pages/ResetPassword";
 
 function Router() {
   return (
@@ -20,6 +22,8 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin/design" component={DesignSettings} />
+      <Route path="/admin/password" component={ChangePassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />
     </Switch>
   );
